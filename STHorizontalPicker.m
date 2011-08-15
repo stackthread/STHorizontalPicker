@@ -129,6 +129,30 @@ const float POINTER_HEIGHT = 7.0f;
         [self.scrollView addSubview:self.scrollViewMarkerContainerView];        
         [self addSubview:self.scrollView];
         [self snapToMarkerAnimated:NO];
+
+        CAGradientLayer *dropshadowLayer = [CAGradientLayer layer];
+        dropshadowLayer.contentsScale = scale;
+        dropshadowLayer.cornerRadius = 8.0f;
+        dropshadowLayer.startPoint = CGPointMake(0.0f, 0.0f);
+        dropshadowLayer.endPoint = CGPointMake(0.0f, 1.0f);
+        dropshadowLayer.opacity = 1.0;
+        dropshadowLayer.frame = CGRectMake(1.0f, 1.0f, self.frame.size.width - 2.0, self.frame.size.height - 2.0);
+        dropshadowLayer.locations = [NSArray arrayWithObjects:
+                                   [NSNumber numberWithFloat:0.0f],
+                                   [NSNumber numberWithFloat:0.05f],
+                                   [NSNumber numberWithFloat:0.2f],
+                                   [NSNumber numberWithFloat:0.8f],
+                                   [NSNumber numberWithFloat:0.95f],                                   
+                                   [NSNumber numberWithFloat:1.0f], nil];
+        dropshadowLayer.colors = [NSArray arrayWithObjects:
+                                (id)[[UIColor colorWithRed:0.05f green:0.05f blue:0.05f alpha:0.75] CGColor], 
+                                (id)[[UIColor colorWithRed:0.25f green:0.25f blue:0.25f alpha:0.55] CGColor], 
+                                (id)[[UIColor colorWithRed:1.0f green:1.0f blue:1.0f alpha:0.05] CGColor], 
+                                (id)[[UIColor colorWithRed:1.0f green:1.0f blue:1.0f alpha:0.05] CGColor], 
+                                (id)[[UIColor colorWithRed:0.25f green:0.25f blue:0.25f alpha:0.55] CGColor],
+                                (id)[[UIColor colorWithRed:0.05f green:0.05f blue:0.05f alpha:0.75] CGColor], nil];
+        
+        [self.layer insertSublayer:dropshadowLayer above:self.scrollView.layer];
         
         CAGradientLayer *gradientLayer = [CAGradientLayer layer];
         gradientLayer.contentsScale = scale;
@@ -151,7 +175,7 @@ const float POINTER_HEIGHT = 7.0f;
                                 (id)[[UIColor colorWithRed:1.0f green:1.0f blue:1.0f alpha:0.1] CGColor], 
                                 (id)[[UIColor colorWithRed:0.25f green:0.25f blue:0.25f alpha:0.8] CGColor],
                                 (id)[[UIColor colorWithRed:0.05f green:0.05f blue:0.05f alpha:0.95] CGColor], nil];
-        [self.layer insertSublayer:gradientLayer above:self.scrollView.layer];
+        [self.layer insertSublayer:gradientLayer above:dropshadowLayer];
         
         self.pointerLayer = [CALayer layer];
         [self.pointerLayer setValue:[NSNumber numberWithFloat:[borderColor red]] forKey:@"borderRed"];
@@ -362,11 +386,15 @@ const float POINTER_HEIGHT = 7.0f;
 	CGContextSetRGBStrokeColor(context, [[layer valueForKey:@"borderRed"] floatValue], [[layer valueForKey:@"borderGreen"] floatValue], [[layer valueForKey:@"borderBlue"] floatValue], [[layer valueForKey:@"borderAlpha"] floatValue]);
     CGContextSetRGBFillColor(context, [[layer valueForKey:@"borderRed"] floatValue], [[layer valueForKey:@"borderGreen"] floatValue], [[layer valueForKey:@"borderBlue"] floatValue], [[layer valueForKey:@"borderAlpha"] floatValue]);
     
+    CGContextSetShadowWithColor(context, CGSizeMake(0, 2), 3.0, [UIColor colorWithRed:0.0 green:0.0 blue:0.0 alpha:0.3].CGColor);
+    
     CGContextMoveToPoint(context, layer.frame.size.width / 2 - POINTER_WIDTH / 2, 0);
     CGContextAddLineToPoint(context, layer.frame.size.width / 2, POINTER_HEIGHT);
     CGContextAddLineToPoint(context, layer.frame.size.width / 2 + POINTER_WIDTH / 2, 0);    
     CGContextFillPath(context);
     CGContextStrokePath(context);
+    
+    CGContextSetShadowWithColor(context, CGSizeMake(0, -2), 3.0, [UIColor colorWithRed:0.0 green:0.0 blue:0.0 alpha:0.3].CGColor);
     
     CGContextMoveToPoint(context, layer.frame.size.width / 2 - POINTER_WIDTH / 2, layer.frame.size.height);
     CGContextAddLineToPoint(context, layer.frame.size.width / 2, layer.frame.size.height - POINTER_HEIGHT);

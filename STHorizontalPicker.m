@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 StackThread Software Ltd
+ * Copyright 2011-2012 StackThread Software Ltd
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -185,7 +185,7 @@ const float POINTER_HEIGHT = 7.0f;
         self.pointerLayer.opacity = 1.0;
         self.pointerLayer.contentsScale = scale;
         self.pointerLayer.frame = CGRectMake(0.0f, 0.0f, self.frame.size.width, self.frame.size.height);
-        self.pointerLayer.delegate = [[STPointerLayerDelegate alloc] init];
+        self.pointerLayer.delegate = [[[STPointerLayerDelegate alloc] init] autorelease];
         [self.layer insertSublayer:self.pointerLayer above:gradientLayer];
         [self.pointerLayer setNeedsDisplay];
     }
@@ -207,14 +207,16 @@ const float POINTER_HEIGHT = 7.0f;
 }
 
 - (void)callDelegateWithNewValueFromOffset:(CGFloat)offset {
+
     CGFloat itemWidth = (float) DISTANCE_BETWEEN_ITEMS;
     
     CGFloat offSet = offset / itemWidth;
     NSUInteger target = (NSUInteger)(offSet + 0.35f);
     target = target > steps ? steps - 1 : target;
-    CGFloat newValue = target * (maximumValue - minimumValue) / steps;
+    CGFloat newValue = target * (maximumValue - minimumValue) / steps + minimumValue;
     
     [delegate pickerView:self didSelectValue:newValue];
+    
 }
 
 - (void)snapToMarkerAnimated:(BOOL)animated {
@@ -327,12 +329,12 @@ const float POINTER_HEIGHT = 7.0f;
     [self setupMarkers];
 }
 
-- (void)setValue:(CGFloat)newValue {    
+- (void)setValue:(CGFloat)newValue {
     value = newValue > maximumValue ? maximumValue : newValue;
     value = newValue < minimumValue ? minimumValue : newValue;
     
     CGFloat itemWidth = (float) DISTANCE_BETWEEN_ITEMS;
-    CGFloat xValue = newValue / ((maximumValue-minimumValue) / steps) * itemWidth + TEXT_LAYER_WIDTH / 2;
+    CGFloat xValue = (newValue - minimumValue) / ((maximumValue-minimumValue) / steps) * itemWidth + TEXT_LAYER_WIDTH / 2;
         
     [self.scrollView setContentOffset:CGPointMake(xValue, 0.0f) animated:NO];
 }
@@ -367,6 +369,10 @@ const float POINTER_HEIGHT = 7.0f;
 
 - (void)dealloc
 {
+    [scrollView release];
+    [scrollViewMarkerContainerView release];
+    [scrollViewMarkerLayerArray release];
+    [pointerLayer release];
     [super dealloc];
 }
 
